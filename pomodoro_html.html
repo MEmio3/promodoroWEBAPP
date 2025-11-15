@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlipClock Pro</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Futuristic Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@400;600&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Apply futuristic fonts */
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* * ==============================================
+         * === SPLIT-FLAP ANIMATION STYLES ===
+         * ==============================================
+         * Updated for a simpler, modern look.
+         */
+
+        .digit-container {
+            width: 100px;
+            height: 140px;
+            perspective: 1000px;
+            /* Responsive scaling for smaller screens */
+            transform: scale(0.8);
+        }
+        
+        @media (min-width: 640px) {
+            .digit-container {
+                transform: scale(0.9);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .digit-container {
+                transform: scale(1);
+            }
+        }
+
+        .digit-half {
+            position: absolute;
+            width: 100%;
+            height: 70px;
+            overflow: hidden;
+            background: #111; /* Solid dark background */
+            border: 1px solid #333; /* Softer border */
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+        }
+
+        .digit-half-content {
+            font-size: 110px; /* Adjusted for Orbitron font */
+            font-weight: 700;
+            color: #ffffff;
+            font-family: 'Orbitron', sans-serif; /* Futuristic font */
+            user-select: none;
+            line-height: 140px;
+            height: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .static-top {
+            top: 0;
+            border-radius: 8px 8px 0 0;
+            border-bottom: 1px solid #333;
+        }
+
+        .static-top .digit-half-content {
+            margin-top: 0;
+        }
+
+        .static-bottom {
+            bottom: 0;
+            border-radius: 0 0 8px 8px;
+            border-top: 1px solid #333;
+            align-items: flex-end;
+        }
+
+        .static-bottom .digit-half-content {
+            margin-top: -70px;
+        }
+
+        .flap {
+            position: absolute;
+            top: 0;
+            width: 100%;
+            height: 70px;
+            transform-style: preserve-3d;
+            transform-origin: bottom;
+            transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+        
+        /* This class is added by JS to trigger the flip */
+        .flipping .flap {
+            transform: rotateX(-180deg);
+        }
+
+        .flap-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            backface-visibility: hidden;
+            background: #111; /* Solid dark background */
+            border: 1px solid #333; /* Softer border */
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+        }
+
+        .flap-face-content {
+            font-size: 110px; /* Adjusted for Orbitron font */
+            font-weight: 700;
+            color: #ffffff;
+            font-family: 'Orbitron', sans-serif; /* Futuristic font */
+            user-select: none;
+            line-height: 140px;
+            height: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .flap-front {
+            border-radius: 8px 8px 0 0;
+            border-bottom: 1px solid #333;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4); /* Softer shadow */
+        }
+
+        .flap-front .flap-face-content {
+            margin-top: 0;
+        }
+
+        .flap-back {
+            transform: rotateX(180deg);
+            border-radius: 0 0 8px 8px;
+            border-top: 1px solid #333;
+            align-items: flex-end;
+        }
+
+        .flap-back .flap-face-content {
+            margin-top: -70px;
+        }
+        
+        /* Separator dots */
+        .separator {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 1rem;
+            padding-left: 0.5rem;
+            padding-right: 0.5rem;
+        }
+        
+        .separator-dot {
+            width: 0.75rem; /* 12px */
+            height: 0.75rem; /* 12px */
+            background-color: #aaa; /* Softer dot color */
+            border-radius: 9999px;
+            box-shadow: none; /* Removed shadow */
+        }
+        
+        /* Active nav button style */
+        .nav-button-active {
+            background-color: #F9FAFB; /* gray-50 */
+            color: #111; /* Dark text */
+        }
+        
+        /* Custom input style */
+        .dark-input {
+            background-color: #111; /* Match digit background */
+            color: white;
+            border: 1px solid #333; /* Match digit border */
+            border-radius: 0.5rem; /* rounded-lg */
+            text-align: center;
+            padding: 0.75rem 1rem;
+            font-family: 'Rajdhani', sans-serif; /* Apply font */
+        }
+        .dark-input:focus {
+            outline: none;
+            border-color: white;
+        }
+
+        /* Futuristic Button Styles */
+        .btn {
+            font-family: 'Orbitron', sans-serif;
+            padding: 0.75rem 2rem; /* 12px 32px */
+            border-radius: 9999px; /* rounded-full */
+            font-size: 1rem; /* text-base */
+            font-weight: 700; /* bold */
+            text-transform: uppercase;
+            letter-spacing: 0.05em; /* tracking-wider */
+            transition: all 0.2s ease-in-out;
+        }
+        .btn:active {
+            transform: scale(0.95);
+        }
+        
+        .btn-primary {
+            background-color: #F9FAFB; /* gray-50 */
+            color: #111;
+        }
+        .btn-primary:hover {
+            background-color: #E5E7EB; /* gray-200 */
+        }
+        
+        .btn-secondary {
+            background-color: #1F2937; /* gray-800 */
+            color: #F9FAFB; /* gray-50 */
+            border: 1px solid #374151; /* gray-700 */
+        }
+        .btn-secondary:hover {
+            background-color: #374151; /* gray-700 */
+        }
+        
+        .btn-danger {
+            background-color: #EF4444; /* red-500 */
+            color: white;
+        }
+        .btn-danger:hover {
+            background-color: #DC2626; /* red-600 */
+        }
+
+    </style>
+</head>
+<body class="min-h-screen bg-black flex items-center justify-center p-4 sm:p-8 text-white">
+
+    <div class="max-w-5xl w-full">
+
+        <!-- Header and Navigation -->
+        <header class="flex flex-col sm:flex-row justify-between items-center mb-12">
+            <h1 class="text-3xl font-bold text-white tracking-wider mb-6 sm:mb-0 font-orbitron">FLIPCLOCK PRO</h1>
+            <nav class="flex gap-2 p-1 bg-gray-900 rounded-full border border-gray-700">
+                <button id="nav-clock" class="nav-button px-6 py-2 rounded-full text-gray-300 hover:bg-gray-700 hover:text-white transition-colors font-orbitron text-sm">CLOCK</button>
+                <button id="nav-pomodoro" class="nav-button px-6 py-2 rounded-full text-gray-300 hover:bg-gray-700 hover:text-white transition-colors font-orbitron text-sm">POMODORO</button>
+                <button id="nav-alarm" class="nav-button px-6 py-2 rounded-full text-gray-300 hover:bg-gray-700 hover:text-white transition-colors font-orbitron text-sm">ALARM</button>
+            </nav>
+        </header>
+
+        <!-- ==============================================
+             === MAIN CONTENT AREA ===
+             ============================================== -->
+        <main>
+
+            <!-- 
+             * ==============================================
+             * === CLOCK VIEW ===
+             * ==============================================
+            -->
+            <div id="clock-view" class="app-view" hidden>
+                <div class="flex justify-center mb-16">
+                    <div class="inline-flex gap-0 sm:gap-4 p-4 sm:p-12 bg-gray-950 rounded-3xl shadow-2xl">
+                        <!-- Hours -->
+                        <div class="flex gap-1 sm:gap-3">
+                            <div id="clock-hr-tens" class="digit-container"></div>
+                            <div id="clock-hr-ones" class="digit-container"></div>
+                        </div>
+                        
+                        <div class="separator">
+                            <div class="separator-dot"></div>
+                            <div class="separator-dot"></div>
+                        </div>
+                        
+                        <!-- Minutes -->
+                        <div class="flex gap-1 sm:gap-3">
+                            <div id="clock-min-tens" class="digit-container"></div>
+                            <div id="clock-min-ones" class="digit-container"></div>
+                        </div>
+                        
+                        <div class="separator">
+                            <div class="separator-dot"></div>
+                            <div class="separator-dot"></div>
+                        </div>
+                        
+                        <!-- Seconds -->
+                        <div class="flex gap-1 sm:gap-3">
+                            <div id="clock-sec-tens" class="digit-container"></div>
+                            <div id="clock-sec-ones" class="digit-container"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 
+             * ==============================================
+             * === POMODORO VIEW ===
+             * ==============================================
+            -->
+            <div id="pomodoro-view" class="app-view" hidden>
+                <!-- Title -->
+                <div class="text-center mb-12">
+                    <h1 id="pomodoro-title" class="text-5xl font-bold text-white mb-2 tracking-wider font-orbitron">POMODORO</h1>
+                    <p id="pomodoro-status" class="text-gray-400 text-lg">Focus Time</p>
+                </div>
+
+                <!-- Split-Flap Display -->
+                <div class="flex justify-center mb-16">
+                    <div class="inline-flex gap-0 sm:gap-8 p-4 sm:p-12 bg-gray-950 rounded-3xl shadow-2xl">
+                        <!-- Minutes -->
+                        <div class="flex gap-1 sm:gap-3">
+                            <div id="pomo-min-tens" class="digit-container"></div>
+                            <div id="pomo-min-ones" class="digit-container"></div>
+                        </div>
+                        
+                        <div class="separator">
+                            <div class="separator-dot"></div>
+                            <div class="separator-dot"></div>
+                        </div>
+                        
+                        <!-- Seconds -->
+                        <div class="flex gap-1 sm:gap-3">
+                            <div id="pomo-sec-tens" class="digit-container"></div>
+                            <div id="pomo-sec-ones" class="digit-container"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings -->
+                <div id="pomodoro-settings" class="flex justify-center gap-8 mb-12">
+                    <div class="flex flex-col items-center">
+                        <label class="text-gray-400 mb-2 text-sm uppercase tracking-wide">Focus (min)</label>
+                        <input
+                            id="focus-time-input"
+                            type="number"
+                            value="25"
+                            class="w-24 px-4 py-3 dark-input"
+                            min="1"
+                        />
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <label class="text-gray-400 mb-2 text-sm uppercase tracking-wide">Break (min)</label>
+                        <input
+                            id="break-time-input"
+                            type="number"
+                            value="5"
+                            class="w-24 px-4 py-3 dark-input"
+                            min="1"
+                        />
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div id="pomodoro-controls-container" class="flex flex-col items-center gap-4">
+                    <!-- Row 1: Start/Pause and Reset -->
+                    <div class="flex justify-center gap-6">
+                        <button
+                            id="start-pause-btn"
+                            class="btn btn-primary"
+                        >
+                            Start
+                        </button>
+                        <button
+                            id="reset-btn"
+                            class="btn btn-secondary"
+                        >
+                            Reset
+                        </button>
+                    </div>
+                    <!-- Row 2: Continue (hidden by default) -->
+                    <div class="flex justify-center">
+                        <button
+                            id="continue-btn"
+                            class="btn btn-primary"
+                            hidden
+                        >
+                            Continue
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 
+             * ==============================================
+             * === ALARM VIEW ===
+             * ==============================================
+            -->
+            <div id="alarm-view" class="app-view text-center" hidden>
+                <h1 class="text-5xl font-bold text-white mb-12 tracking-wider font-orbitron">SET ALARM</h1>
+                
+                <div class="flex justify-center gap-4 mb-8">
+                    <input id="alarm-time-input" type="time" class="dark-input text-2xl w-48">
+                </div>
+                
+                <div class="flex justify-center gap-6 mb-8">
+                     <button
+                        id="set-alarm-btn"
+                        class="btn btn-primary"
+                    >
+                        Set Alarm
+                    </button>
+                    <button
+                        id="clear-alarm-btn"
+                        class="btn btn-secondary"
+                    >
+                        Clear Alarm
+                    </button>
+                </div>
+                
+                <div id="alarm-stop-controls" class="flex justify-center gap-6 mb-8" hidden>
+                    <button
+                        id="stop-alarm-btn"
+                        class="btn btn-danger"
+                    >
+                        Stop Alarm
+                    </button>
+                </div>
+                
+                <p id="alarm-status-message" class="text-gray-400 text-lg h-6"></p>
+
+            </div>
+
+        </main>
+
+        <!-- Hidden audio element -->
+        <audio id="alarm-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"></audio>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // ==============================================
+            // === GLOBAL STATE & DOM ELEMENTS ===
+            // ==============================================
+            
+            let globalState = {
+                activeView: 'pomodoro',
+                pomodoro: {
+                    focusTime: 25, // minutes
+                    breakTime: 5,  // minutes
+                    timeLeft: 25 * 60, // seconds
+                    isRunning: false,
+                    isBreak: false,
+                    isAlarmPlaying: false,
+                    intervalId: null
+                },
+                alarm: {
+                    setTime: null, // e.g., "14:30"
+                    isAlarmPlaying: false,
+                    checkIntervalId: null
+                },
+                clock: {
+                    intervalId: null
+                }
+            };
+            
+            // --- General Elements ---
+            const audio = document.getElementById('alarm-sound');
+            
+            // --- Navigation Elements ---
+            const navButtons = {
+                clock: document.getElementById('nav-clock'),
+                pomodoro: document.getElementById('nav-pomodoro'),
+                alarm: document.getElementById('nav-alarm')
+            };
+            const views = {
+                clock: document.getElementById('clock-view'),
+                pomodoro: document.getElementById('pomodoro-view'),
+                alarm: document.getElementById('alarm-view')
+            };
+            
+            // --- Clock View Elements ---
+            const clockDigits = {
+                hrTens: document.getElementById('clock-hr-tens'),
+                hrOnes: document.getElementById('clock-hr-ones'),
+                minTens: document.getElementById('clock-min-tens'),
+                minOnes: document.getElementById('clock-min-ones'),
+                secTens: document.getElementById('clock-sec-tens'),
+                secOnes: document.getElementById('clock-sec-ones')
+            };
+            
+            // --- Pomodoro View Elements ---
+            const pomodoroDigits = {
+                minTens: document.getElementById('pomo-min-tens'),
+                minOnes: document.getElementById('pomo-min-ones'),
+                secTens: document.getElementById('pomo-sec-tens'),
+                secOnes: document.getElementById('pomo-sec-ones')
+            };
+            const pomoTitle = document.getElementById('pomodoro-title');
+            const pomoStatus = document.getElementById('pomodoro-status');
+            const pomoSettings = document.getElementById('pomodoro-settings');
+            // --- Pomodoro Control Buttons ---
+            const startPauseBtn = document.getElementById('start-pause-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            const continueBtn = document.getElementById('continue-btn');
+            // ---
+            const focusInput = document.getElementById('focus-time-input');
+            const breakInput = document.getElementById('break-time-input');
+            
+            // --- Alarm View Elements ---
+            const alarmTimeInput = document.getElementById('alarm-time-input');
+            const setAlarmBtn = document.getElementById('set-alarm-btn');
+            const clearAlarmBtn = document.getElementById('clear-alarm-btn');
+            const alarmStopControls = document.getElementById('alarm-stop-controls');
+            const stopAlarmBtn = document.getElementById('stop-alarm-btn');
+            const alarmStatusMsg = document.getElementById('alarm-status-message');
+
+
+            // ==============================================
+            // === SPLIT-FLAP CORE LOGIC ===
+            // ==============================================
+
+            /**
+             * Creates the HTML structure for a single flip digit.
+             */
+            function createDigitHTML(initialValue = 0) {
+                return `
+                    <div class="digit-half static-top">
+                        <div class="digit-half-content static-top-content">${initialValue}</div>
+                    </div>
+                    <div class="digit-half static-bottom">
+                        <div class="digit-half-content static-bottom-content">${initialValue}</div>
+                    </div>
+                    <div class="flap">
+                        <div class="flap-face flap-front">
+                            <div class="flap-face-content flap-front-content">${initialValue}</div>
+                        </div>
+                        <div class="flap-face flap-back">
+                            <div class="flap-face-content flap-back-content">${initialValue}</div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            /**
+             * Performs the flip animation on a single digit container.
+             */
+            function performFlip(digitContainer, newValue) {
+                if (!digitContainer) return;
+                
+                const staticTop = digitContainer.querySelector('.static-top-content');
+                const staticBottom = digitContainer.querySelector('.static-bottom-content');
+                const flapFront = digitContainer.querySelector('.flap-front-content');
+                const flapBack = digitContainer.querySelector('.flap-back-content');
+                const currentValue = staticBottom.textContent;
+
+                if (currentValue === String(newValue)) {
+                    return;
+                }
+
+                staticTop.textContent = newValue;
+                flapBack.textContent = newValue;
+                digitContainer.classList.add('flipping');
+
+                setTimeout(() => {
+                    staticBottom.textContent = newValue;
+                    flapFront.textContent = newValue;
+                    digitContainer.classList.remove('flipping');
+                }, 600);
+            }
+
+
+            // ==============================================
+            // === HELPER FUNCTIONS ===
+            // ==============================================
+            
+            function formatTime(seconds) {
+                const mins = Math.floor(seconds / 60);
+                const secs = seconds % 60;
+                return {
+                    minTens: Math.floor(mins / 10),
+                    minOnes: mins % 10,
+                    secTens: Math.floor(secs / 10),
+                    secOnes: secs % 10
+                };
+            }
+            
+            function formatClockTime(date) {
+                const h = date.getHours();
+                const m = date.getMinutes();
+                const s = date.getSeconds();
+                return {
+                    hrTens: Math.floor(h / 10),
+                    hrOnes: h % 10,
+                    minTens: Math.floor(m / 10),
+                    minOnes: m % 10,
+                    secTens: Math.floor(s / 10),
+                    secOnes: s % 10
+                };
+            }
+            
+            function playAlarm(loop = false) {
+                audio.loop = loop;
+                audio.currentTime = 0;
+                audio.play().catch(e => console.error("Audio play failed:", e));
+            }
+
+            function stopAlarm() {
+                audio.pause();
+                audio.currentTime = 0;
+            }
+            
+            // ==============================================
+            // === VIEW SWITCHING LOGIC ===
+            // ==============================================
+
+            function switchView(viewName) {
+                globalState.activeView = viewName;
+                Object.values(views).forEach(view => view.setAttribute('hidden', true));
+                Object.values(navButtons).forEach(btn => btn.classList.remove('nav-button-active'));
+                
+                if (views[viewName]) {
+                    views[viewName].removeAttribute('hidden');
+                }
+                if (navButtons[viewName]) {
+                    navButtons[viewName].classList.add('nav-button-active');
+                }
+            }
+
+
+            // ==============================================
+            // === CLOCK LOGIC ===
+            // ==============================================
+            
+            function initializeClockDigits() {
+                const now = new Date();
+                const time = formatClockTime(now);
+                
+                clockDigits.hrTens.innerHTML = createDigitHTML(time.hrTens);
+                clockDigits.hrOnes.innerHTML = createDigitHTML(time.hrOnes);
+                clockDigits.minTens.innerHTML = createDigitHTML(time.minTens);
+                clockDigits.minOnes.innerHTML = createDigitHTML(time.minOnes);
+                clockDigits.secTens.innerHTML = createDigitHTML(time.secTens);
+                clockDigits.secOnes.innerHTML = createDigitHTML(time.secOnes);
+            }
+            
+            function updateClockDisplay() {
+                const now = new Date();
+                const time = formatClockTime(now);
+                
+                performFlip(clockDigits.hrTens, time.hrTens);
+                performFlip(clockDigits.hrOnes, time.hrOnes);
+                performFlip(clockDigits.minTens, time.minTens);
+                performFlip(clockDigits.minOnes, time.minOnes);
+                performFlip(clockDigits.secTens, time.secTens);
+                performFlip(clockDigits.secOnes, time.secOnes);
+            }
+
+            function startClock() {
+                if (globalState.clock.intervalId) {
+                    clearInterval(globalState.clock.intervalId);
+                }
+                updateClockDisplay();
+                globalState.clock.intervalId = setInterval(updateClockDisplay, 1000);
+            }
+
+
+            // ==============================================
+            // === POMODORO LOGIC ===
+            // ==============================================
+            
+            function initializePomodoroDigits() {
+                const time = formatTime(globalState.pomodoro.timeLeft);
+                pomodoroDigits.minTens.innerHTML = createDigitHTML(time.minTens);
+                pomodoroDigits.minOnes.innerHTML = createDigitHTML(time.minOnes);
+                pomodoroDigits.secTens.innerHTML = createDigitHTML(time.secTens);
+                pomodoroDigits.secOnes.innerHTML = createDigitHTML(time.secOnes);
+            }
+            
+            function updatePomodoroDisplay() {
+                const time = formatTime(globalState.pomodoro.timeLeft);
+                performFlip(pomodoroDigits.minTens, time.minTens);
+                performFlip(pomodoroDigits.minOnes, time.minOnes);
+                performFlip(pomodoroDigits.secTens, time.secTens);
+                performFlip(pomodoroDigits.secOnes, time.secOnes);
+            }
+            
+            function pomodoroTick() {
+                globalState.pomodoro.timeLeft -= 1;
+                updatePomodoroDisplay();
+                
+                if (globalState.pomodoro.timeLeft <= 0) {
+                    clearInterval(globalState.pomodoro.intervalId);
+                    globalState.pomodoro.intervalId = null;
+                    globalState.pomodoro.isRunning = false;
+                    globalState.pomodoro.isAlarmPlaying = true;
+                    
+                    playAlarm(true);
+                    
+                    // Show "Continue" button, hide Start/Reset
+                    startPauseBtn.setAttribute('hidden', true);
+                    resetBtn.setAttribute('hidden', true);
+                    continueBtn.removeAttribute('hidden');
+                    pomoSettings.setAttribute('hidden', true);
+                    
+                    pomoStatus.textContent = globalState.pomodoro.isBreak ? "Break's Over!" : "Time for a Break!";
+                }
+            }
+            
+            function togglePomodoro() {
+                if (globalState.pomodoro.isAlarmPlaying) return;
+
+                globalState.pomodoro.isRunning = !globalState.pomodoro.isRunning;
+                
+                if (globalState.pomodoro.isRunning) {
+                    startPauseBtn.textContent = "Pause";
+                    pomoSettings.setAttribute('hidden', true);
+                    
+                    if (!globalState.pomodoro.intervalId) {
+                        if (globalState.pomodoro.timeLeft <= 0) {
+                             const newTime = globalState.pomodoro.isBreak ? globalState.pomodoro.breakTime : globalState.pomodoro.focusTime;
+                             globalState.pomodoro.timeLeft = newTime * 60;
+                             updatePomodoroDisplay();
+                        }
+                        globalState.pomodoro.intervalId = setInterval(pomodoroTick, 1000);
+                    }
+                } else {
+                    startPauseBtn.textContent = "Start";
+                    pomoSettings.removeAttribute('hidden');
+                    
+                    if (globalState.pomodoro.intervalId) {
+                        clearInterval(globalState.pomodoro.intervalId);
+                        globalState.pomodoro.intervalId = null;
+                    }
+                }
+            }
+            
+            function resetPomodoro() {
+                if (globalState.pomodoro.intervalId) {
+                    clearInterval(globalState.pomodoro.intervalId);
+                    globalState.pomodoro.intervalId = null;
+                }
+                
+                stopAlarm();
+                
+                globalState.pomodoro.isRunning = false;
+                globalState.pomodoro.isAlarmPlaying = false;
+                globalState.pomodoro.isBreak = false;
+                globalState.pomodoro.timeLeft = globalState.pomodoro.focusTime * 60;
+                
+                updatePomodoroDisplay();
+                
+                startPauseBtn.textContent = "Start";
+                pomoStatus.textContent = "Focus Time";
+                
+                // Ensure the correct buttons are shown/hidden
+                startPauseBtn.removeAttribute('hidden');
+                resetBtn.removeAttribute('hidden');
+                continueBtn.setAttribute('hidden', true);
+                
+                pomoSettings.removeAttribute('hidden');
+            }
+            
+            function continuePomodoro() {
+                stopAlarm();
+                
+                globalState.pomodoro.isAlarmPlaying = false;
+                globalState.pomodoro.isBreak = !globalState.pomodoro.isBreak;
+                
+                const newTime = globalState.pomodoro.isBreak ? globalState.pomodoro.breakTime : globalState.pomodoro.focusTime;
+                globalState.pomodoro.timeLeft = newTime * 60;
+                
+                pomoStatus.textContent = globalState.pomodoro.isBreak ? "Break Time" : "Focus Time";
+                
+                updatePomodoroDisplay();
+                
+                // Hide "Continue", show main controls
+                startPauseBtn.removeAttribute('hidden');
+                resetBtn.removeAttribute('hidden');
+                continueBtn.setAttribute('hidden', true);
+                
+                // Automatically start the next session
+                togglePomodoro(); 
+            }
+            
+
+            // ==============================================
+            // === ALARM LOGIC ===
+            // ==============================================
+            
+            function checkAlarm() {
+                if (!globalState.alarm.setTime || globalState.alarm.isAlarmPlaying) {
+                    return;
+                }
+                
+                const now = new Date();
+                const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+                
+                if (currentTime === globalState.alarm.setTime) {
+                    console.log("ALARM TRIGGERED!");
+                    globalState.alarm.isAlarmPlaying = true;
+                    globalState.alarm.setTime = null;
+                    alarmStatusMsg.textContent = "Alarm!";
+                    
+                    playAlarm(true);
+                    
+                    alarmStopControls.removeAttribute('hidden');
+                }
+            }
+            
+            function setAlarm() {
+                const timeValue = alarmTimeInput.value;
+                if (!timeValue) {
+                    alarmStatusMsg.textContent = "Please select a valid time.";
+                    return;
+                }
+                
+                globalState.alarm.setTime = timeValue;
+                alarmStatusMsg.textContent = `Alarm set for ${timeValue}`;
+                
+                if (!globalState.alarm.checkIntervalId) {
+                    globalState.alarm.checkIntervalId = setInterval(checkAlarm, 5000);
+                }
+            }
+            
+            function clearAlarm() {
+                globalState.alarm.setTime = null;
+                alarmStatusMsg.textContent = "Alarm cleared.";
+                
+                if (globalState.alarm.isAlarmPlaying) {
+                    stopGeneralAlarm();
+                }
+            }
+            
+            function stopGeneralAlarm() {
+                stopAlarm();
+                globalState.alarm.isAlarmPlaying = false;
+                alarmStopControls.setAttribute('hidden', true);
+                alarmStatusMsg.textContent = "Alarm stopped.";
+            }
+
+            // ==============================================
+            // === INITIALIZATION & EVENT LISTENERS ===
+            // ==============================================
+            
+            navButtons.clock.addEventListener('click', () => switchView('clock'));
+            navButtons.pomodoro.addEventListener('click', () => switchView('pomodoro'));
+            navButtons.alarm.addEventListener('click', () => switchView('alarm'));
+            
+            startPauseBtn.addEventListener('click', togglePomodoro);
+            resetBtn.addEventListener('click', resetPomodoro);
+            continueBtn.addEventListener('click', continuePomodoro);
+            
+            focusInput.addEventListener('change', (e) => {
+                const val = Math.max(1, parseInt(e.target.value) || 1);
+                globalState.pomodoro.focusTime = val;
+                if (!globalState.pomodoro.isRunning && !globalState.pomodoro.isBreak) {
+                    globalState.pomodoro.timeLeft = val * 60;
+                    updatePomodoroDisplay();
+                }
+            });
+            
+            breakInput.addEventListener('change', (e) => {
+                const val = Math.max(1, parseInt(e.target.value) || 1);
+                globalState.pomodoro.breakTime = val;
+                if (!globalState.pomodoro.isRunning && globalState.pomodoro.isBreak) {
+                    globalState.pomodoro.timeLeft = val * 60;
+                    updatePomodoroDisplay();
+                }
+            });
+            
+            setAlarmBtn.addEventListener('click', setAlarm);
+            clearAlarmBtn.addEventListener('click', clearAlarm);
+            stopAlarmBtn.addEventListener('click', stopGeneralAlarm);
+
+            function init() {
+                initializeClockDigits();
+                initializePomodoroDigits();
+                startClock();
+                globalState.alarm.checkIntervalId = setInterval(checkAlarm, 5000);
+                switchView('pomodoro');
+            }
+            
+            init();
+        });
+    </script>
+</body>
+</html>
