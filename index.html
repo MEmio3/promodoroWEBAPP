@@ -9,31 +9,72 @@
     <!-- Load Futuristic Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Added Roboto Mono and Major Mono Display for digit options -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Rajdhani:wght@400;600&family=Inter:wght@400;600;700&family=Roboto+Mono:wght@700&family=Major+Mono+Display&display=swap" rel="stylesheet">
     
     <style>
-        /* Apply futuristic fonts */
+        /* Define CSS variables for customization */
+        :root {
+            --primary-color: #4F46E5; /* Default to Indigo for a cleaner start */
+            --digit-font-family: 'Orbitron', sans-serif; /* New variable for digits */
+        }
+        
+        /* Apply base font and color */
         body {
             font-family: 'Rajdhani', sans-serif;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            color: #F9FAFB;
         }
         
         .font-orbitron {
             font-family: 'Orbitron', sans-serif;
         }
 
+        /* Dynamic primary color applications */
+        .text-primary-color {
+            color: var(--primary-color);
+        }
+        .border-primary-color {
+            border-color: var(--primary-color);
+        }
+        /* Active nav button background and border color */
+        .nav-button-active {
+            background-color: var(--primary-color); 
+            color: #111;
+            border-width: 1px;
+            border-style: solid;
+        }
+        
+        /* * ==============================================
+         * === FOCUS MODE STYLES (Hide all distracting elements) ===
+         * ==============================================
+         */
+        body.fullscreen-focus > header,
+        body.fullscreen-focus #pomodoro-view > .text-center, /* Pomodoro Title and status */
+        body.fullscreen-focus #pomodoro-settings,
+        body.fullscreen-focus #pomodoro-controls-container,
+        body.fullscreen-focus #alarm-sound {
+            display: none !important;
+        }
+        /* Scale the clock container up significantly in focus mode */
+        body.fullscreen-focus #pomodoro-view .inline-flex {
+            transform: scale(1.5);
+            /* Remove shadows/padding in focus mode for maximal simplicity */
+            box-shadow: none !important;
+            padding: 0 !important; 
+            background: none !important;
+        }
+        
         /* * ==============================================
          * === SPLIT-FLAP ANIMATION STYLES ===
          * ==============================================
-         * Updated for a simpler, modern look.
          */
 
         .digit-container {
             width: 100px;
             height: 140px;
             perspective: 1000px;
-            /* Responsive scaling for smaller screens */
             transform: scale(0.8);
         }
         
@@ -54,18 +95,18 @@
             width: 100%;
             height: 70px;
             overflow: hidden;
-            background: #111; /* Solid dark background */
-            border: 1px solid #333; /* Softer border */
+            background: #111;
+            border: 1px solid #333;
             display: flex;
             align-items: flex-start;
             justify-content: center;
         }
 
         .digit-half-content {
-            font-size: 110px; /* Adjusted for Orbitron font */
+            font-size: 110px;
             font-weight: 700;
             color: #ffffff;
-            font-family: 'Orbitron', sans-serif; /* Futuristic font */
+            font-family: var(--digit-font-family); /* Use variable for digits */
             user-select: none;
             line-height: 140px;
             height: 140px;
@@ -105,7 +146,6 @@
             transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
         }
         
-        /* This class is added by JS to trigger the flip */
         .flipping .flap {
             transform: rotateX(-180deg);
         }
@@ -116,18 +156,18 @@
             height: 100%;
             overflow: hidden;
             backface-visibility: hidden;
-            background: #111; /* Solid dark background */
-            border: 1px solid #333; /* Softer border */
+            background: #111;
+            border: 1px solid #333;
             display: flex;
             align-items: flex-start;
             justify-content: center;
         }
 
         .flap-face-content {
-            font-size: 110px; /* Adjusted for Orbitron font */
+            font-size: 110px;
             font-weight: 700;
             color: #ffffff;
-            font-family: 'Orbitron', sans-serif; /* Futuristic font */
+            font-family: var(--digit-font-family); /* Use variable for digits */
             user-select: none;
             line-height: 140px;
             height: 140px;
@@ -139,7 +179,7 @@
         .flap-front {
             border-radius: 8px 8px 0 0;
             border-bottom: 1px solid #333;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4); /* Softer shadow */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
         }
 
         .flap-front .flap-face-content {
@@ -168,28 +208,22 @@
         }
         
         .separator-dot {
-            width: 0.75rem; /* 12px */
-            height: 0.75rem; /* 12px */
-            background-color: #aaa; /* Softer dot color */
+            width: 0.75rem;
+            height: 0.75rem;
+            background-color: #aaa;
             border-radius: 9999px;
-            box-shadow: none; /* Removed shadow */
-        }
-        
-        /* Active nav button style */
-        .nav-button-active {
-            background-color: #F9FAFB; /* gray-50 */
-            color: #111; /* Dark text */
+            box-shadow: none;
         }
         
         /* Custom input style */
         .dark-input {
-            background-color: #111; /* Match digit background */
+            background-color: #111;
             color: white;
-            border: 1px solid #333; /* Match digit border */
-            border-radius: 0.5rem; /* rounded-lg */
+            border: 1px solid #333;
+            border-radius: 0.5rem;
             text-align: center;
             padding: 0.75rem 1rem;
-            font-family: 'Rajdhani', sans-serif; /* Apply font */
+            font-family: inherit;
         }
         .dark-input:focus {
             outline: none;
@@ -199,56 +233,87 @@
         /* Futuristic Button Styles */
         .btn {
             font-family: 'Orbitron', sans-serif;
-            padding: 0.75rem 2rem; /* 12px 32px */
-            border-radius: 9999px; /* rounded-full */
-            font-size: 1rem; /* text-base */
-            font-weight: 700; /* bold */
+            padding: 0.75rem 2rem;
+            border-radius: 9999px;
+            font-size: 1rem;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.05em; /* tracking-wider */
+            letter-spacing: 0.05em;
             transition: all 0.2s ease-in-out;
+            cursor: pointer;
         }
         .btn:active {
             transform: scale(0.95);
         }
         
         .btn-primary {
-            background-color: #F9FAFB; /* gray-50 */
+            background-color: var(--primary-color); /* Use variable */
             color: #111;
         }
         .btn-primary:hover {
-            background-color: #E5E7EB; /* gray-200 */
+            opacity: 0.9;
         }
         
         .btn-secondary {
-            background-color: #1F2937; /* gray-800 */
-            color: #F9FAFB; /* gray-50 */
-            border: 1px solid #374151; /* gray-700 */
+            background-color: #1F2937;
+            color: #F9FAFB;
+            border: 1px solid #374151;
         }
         .btn-secondary:hover {
-            background-color: #374151; /* gray-700 */
+            background-color: #374151;
         }
         
         .btn-danger {
-            background-color: #EF4444; /* red-500 */
+            background-color: #EF4444;
             color: white;
         }
         .btn-danger:hover {
-            background-color: #DC2626; /* red-600 */
+            background-color: #DC2626;
+        }
+
+        /* Style the color picker */
+        .color-picker {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 48px;
+            height: 48px;
+            background-color: transparent;
+            border: 1px solid #333;
+            padding: 0;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .color-picker::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+        .color-picker::-webkit-color-swatch {
+            border: none;
+            border-radius: 7px;
+        }
+        .color-picker::-moz-color-swatch {
+            border: none;
+            border-radius: 7px;
         }
 
     </style>
 </head>
-<body class="min-h-screen bg-black flex items-center justify-center p-4 sm:p-8 text-white">
+<body class="min-h-screen bg-black flex items-center justify-center p-4 sm:p-8">
 
     <div class="max-w-5xl w-full">
 
         <!-- Header and Navigation -->
         <header class="flex flex-col sm:flex-row justify-between items-center mb-12">
-            <h1 class="text-3xl font-bold text-white tracking-wider mb-6 sm:mb-0 font-orbitron">FLIPCLOCK PRO</h1>
+            <h1 class="text-3xl font-bold tracking-wider mb-6 sm:mb-0 font-orbitron text-primary-color" id="app-title">FLIPCLOCK PRO</h1>
             <nav class="flex gap-2 p-1 bg-gray-900 rounded-full border border-gray-700">
                 <button id="nav-clock" class="nav-button px-6 py-2 rounded-full text-gray-300 hover:bg-gray-700 hover:text-white transition-colors font-orbitron text-sm">CLOCK</button>
                 <button id="nav-pomodoro" class="nav-button px-6 py-2 rounded-full text-gray-300 hover:bg-gray-700 hover:text-white transition-colors font-orbitron text-sm">POMODORO</button>
                 <button id="nav-alarm" class="nav-button px-6 py-2 rounded-full text-gray-300 hover:bg-gray-700 hover:text-white transition-colors font-orbitron text-sm">ALARM</button>
+                
+                <!-- SETTINGS BUTTON -->
+                <button id="nav-settings" class="nav-button px-3 py-2 rounded-full text-gray-300 hover:bg-gray-700 hover:text-white transition-colors font-orbitron text-sm">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.525.322 1.017.502 1.524.502.507 0 1.006-.18 1.523-.502z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                </button>
             </nav>
         </header>
 
@@ -304,7 +369,7 @@
             <div id="pomodoro-view" class="app-view" hidden>
                 <!-- Title -->
                 <div class="text-center mb-12">
-                    <h1 id="pomodoro-title" class="text-5xl font-bold text-white mb-2 tracking-wider font-orbitron">POMODORO</h1>
+                    <h1 id="pomodoro-title" class="text-5xl font-bold mb-2 tracking-wider font-orbitron">POMODORO</h1>
                     <p id="pomodoro-status" class="text-gray-400 text-lg">Focus Time</p>
                 </div>
 
@@ -330,33 +395,35 @@
                     </div>
                 </div>
 
-                <!-- Settings -->
-                <div id="pomodoro-settings" class="flex justify-center gap-8 mb-12">
-                    <div class="flex flex-col items-center">
-                        <label class="text-gray-400 mb-2 text-sm uppercase tracking-wide">Focus (min)</label>
-                        <input
-                            id="focus-time-input"
-                            type="number"
-                            value="25"
-                            class="w-24 px-4 py-3 dark-input"
-                            min="1"
-                        />
-                    </div>
-                    <div class="flex flex-col items-center">
-                        <label class="text-gray-400 mb-2 text-sm uppercase tracking-wide">Break (min)</label>
-                        <input
-                            id="break-time-input"
-                            type="number"
-                            value="5"
-                            class="w-24 px-4 py-3 dark-input"
-                            min="1"
-                        />
+                <!-- Timer Settings -->
+                <div id="pomodoro-settings" class="flex flex-col items-center gap-12">
+                    <div class="flex justify-center gap-8">
+                        <div class="flex flex-col items-center">
+                            <label class="text-gray-400 mb-2 text-sm uppercase tracking-wide">Focus (min)</label>
+                            <input
+                                id="focus-time-input"
+                                type="number"
+                                value="25"
+                                class="w-24 px-4 py-3 dark-input"
+                                min="1"
+                            />
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <label class="text-gray-400 mb-2 text-sm uppercase tracking-wide">Break (min)</label>
+                            <input
+                                id="break-time-input"
+                                type="number"
+                                value="5"
+                                class="w-24 px-4 py-3 dark-input"
+                                min="1"
+                            />
+                        </div>
                     </div>
                 </div>
-
+                
                 <!-- Controls -->
-                <div id="pomodoro-controls-container" class="flex flex-col items-center gap-4">
-                    <!-- Row 1: Start/Pause and Reset -->
+                <div id="pomodoro-controls-container" class="flex flex-col items-center gap-4 mt-12">
+                    <!-- Row 1: Start/Pause, Reset, and Focus Button -->
                     <div class="flex justify-center gap-6">
                         <button
                             id="start-pause-btn"
@@ -369,6 +436,12 @@
                             class="btn btn-secondary"
                         >
                             Reset
+                        </button>
+                        <button
+                            id="focus-mode-btn"
+                            class="btn btn-secondary"
+                        >
+                            Focus Mode
                         </button>
                     </div>
                     <!-- Row 2: Continue (hidden by default) -->
@@ -390,7 +463,7 @@
              * ==============================================
             -->
             <div id="alarm-view" class="app-view text-center" hidden>
-                <h1 class="text-5xl font-bold text-white mb-12 tracking-wider font-orbitron">SET ALARM</h1>
+                <h1 class="text-5xl font-bold mb-12 tracking-wider font-orbitron">SET ALARM</h1>
                 
                 <div class="flex justify-center gap-4 mb-8">
                     <input id="alarm-time-input" type="time" class="dark-input text-2xl w-48">
@@ -424,6 +497,57 @@
 
             </div>
 
+            <!-- 
+             * ==============================================
+             * === SETTINGS VIEW ===
+             * ==============================================
+            -->
+            <div id="settings-view" class="app-view text-center" hidden>
+                <div class="flex justify-center">
+                    <div class="w-full max-w-lg bg-gray-900 p-6 rounded-xl border border-gray-700 shadow-lg text-left">
+                        <h1 class="text-3xl font-bold mb-6 font-orbitron text-primary-color border-b border-gray-700 pb-3">Theme Settings</h1>
+                        
+                        <!-- Font Selector: Body Text -->
+                        <div class="flex justify-between items-center mb-5">
+                            <label for="font-select" class="text-gray-400 uppercase text-sm tracking-wider">Body Text Font</label>
+                            <select id="font-select" class="dark-input py-2 px-3 w-36">
+                                <option value="Rajdhani">Rajdhani</option>
+                                <option value="Inter">Inter</option>
+                                <option value="Monospace">Monospace</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Font Selector: Clock Digits -->
+                        <div class="flex justify-between items-center mb-6 border-b border-gray-800 pb-5">
+                            <label for="digit-font-select" class="text-gray-400 uppercase text-sm tracking-wider">Clock Digits Font</label>
+                            <select id="digit-font-select" class="dark-input py-2 px-3 w-36">
+                                <option value="Orbitron">Orbitron (Futuristic)</option>
+                                <option value="Roboto Mono">Roboto Mono (Tech)</option>
+                                <option value="Major Mono Display">Major Mono (Minimal)</option>
+                            </select>
+                        </div>
+
+                        <!-- Color Picker -->
+                        <div class="flex justify-between items-center mb-6 pt-5">
+                            <label for="accent-color-picker" class="text-gray-400 uppercase text-sm tracking-wider">Accent Color</label>
+                            <input type="color" id="accent-color-picker" class="color-picker" value="#4F46E5">
+                        </div>
+
+                        <!-- Theme Presets -->
+                        <div class="border-t border-gray-700 pt-4">
+                            <label class="text-gray-400 uppercase text-sm tracking-wider block mb-2 text-center">Color Presets</label>
+                            <div class="flex gap-2 justify-center">
+                                <button data-color="#4F46E5" class="theme-preset-btn w-10 h-10 rounded-full border-2 border-gray-700 hover:ring-2 hover:ring-offset-2 hover:ring-indigo-500 hover:ring-offset-gray-900 transition-all" style="background-color: #4F46E5;" title="Indigo"></button>
+                                <button data-color="#10B981" class="theme-preset-btn w-10 h-10 rounded-full border-2 border-gray-700 hover:ring-2 hover:ring-offset-2 hover:ring-emerald-500 hover:ring-offset-gray-900 transition-all" style="background-color: #10B981;" title="Emerald"></button>
+                                <button data-color="#F9FAFB" class="theme-preset-btn w-10 h-10 rounded-full border-2 border-gray-700 hover:ring-2 hover:ring-offset-2 hover:ring-white hover:ring-offset-gray-900 transition-all" style="background-color: #F9FAFB;" title="White"></button>
+                                <button data-color="#FBBF24" class="theme-preset-btn w-10 h-10 rounded-full border-2 border-gray-700 hover:ring-2 hover:ring-offset-2 hover:ring-amber-500 hover:ring-offset-gray-900 transition-all" style="background-color: #FBBF24;" title="Amber"></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
         </main>
 
         <!-- Hidden audio element -->
@@ -455,22 +579,31 @@
                 },
                 clock: {
                     intervalId: null
+                },
+                theme: {
+                    font: 'Rajdhani',
+                    digitFont: 'Orbitron', // New state for digit font
+                    primaryColor: '#4F46E5' // Default set to Indigo
                 }
             };
             
             // --- General Elements ---
+            const root = document.documentElement;
+            const body = document.body;
             const audio = document.getElementById('alarm-sound');
             
             // --- Navigation Elements ---
             const navButtons = {
                 clock: document.getElementById('nav-clock'),
                 pomodoro: document.getElementById('nav-pomodoro'),
-                alarm: document.getElementById('nav-alarm')
+                alarm: document.getElementById('nav-alarm'),
+                settings: document.getElementById('nav-settings') 
             };
             const views = {
                 clock: document.getElementById('clock-view'),
                 pomodoro: document.getElementById('pomodoro-view'),
-                alarm: document.getElementById('alarm-view')
+                alarm: document.getElementById('alarm-view'),
+                settings: document.getElementById('settings-view')
             };
             
             // --- Clock View Elements ---
@@ -493,13 +626,19 @@
             const pomoTitle = document.getElementById('pomodoro-title');
             const pomoStatus = document.getElementById('pomodoro-status');
             const pomoSettings = document.getElementById('pomodoro-settings');
-            // --- Pomodoro Control Buttons ---
             const startPauseBtn = document.getElementById('start-pause-btn');
             const resetBtn = document.getElementById('reset-btn');
             const continueBtn = document.getElementById('continue-btn');
-            // ---
+            const focusModeBtn = document.getElementById('focus-mode-btn'); // New element reference
             const focusInput = document.getElementById('focus-time-input');
             const breakInput = document.getElementById('break-time-input');
+
+            // --- Theme Elements ---
+            const fontSelect = document.getElementById('font-select');
+            const digitFontSelect = document.getElementById('digit-font-select'); 
+            const colorPicker = document.getElementById('accent-color-picker');
+            const themePresetBtns = document.querySelectorAll('.theme-preset-btn');
+            const appTitle = document.getElementById('app-title');
             
             // --- Alarm View Elements ---
             const alarmTimeInput = document.getElementById('alarm-time-input');
@@ -605,19 +744,88 @@
             }
             
             // ==============================================
+            // === THEME LOGIC ===
+            // ==============================================
+
+            function applyTheme() {
+                // 1. Apply body font via style attribute
+                const fontName = globalState.theme.font;
+                let fontFamily = 'Rajdhani, sans-serif';
+                if (fontName === 'Inter') {
+                    fontFamily = 'Inter, sans-serif';
+                } else if (fontName === 'Monospace') {
+                    fontFamily = "'Courier New', monospace";
+                }
+                body.style.fontFamily = fontFamily;
+                
+                // 2. Apply digit font via CSS variable
+                const digitFontName = globalState.theme.digitFont;
+                let digitFontFamily = 'Orbitron, sans-serif';
+                if (digitFontName === 'Roboto Mono') {
+                    digitFontFamily = "'Roboto Mono', monospace";
+                } else if (digitFontName === 'Major Mono Display') {
+                    digitFontFamily = "'Major Mono Display', monospace";
+                }
+                root.style.setProperty('--digit-font-family', digitFontFamily);
+
+
+                // 3. Apply primary color via CSS variable
+                root.style.setProperty('--primary-color', globalState.theme.primaryColor);
+                
+                // 4. Re-apply active nav class to update border/background color
+                switchView(globalState.activeView, false); 
+            }
+            
+            function handleFontChange(e) {
+                globalState.theme.font = e.target.value;
+                applyTheme();
+            }
+
+            function handleDigitFontChange(e) {
+                globalState.theme.digitFont = e.target.value;
+                applyTheme();
+            }
+
+            function handleColorChange(e) {
+                globalState.theme.primaryColor = e.target.value;
+                applyTheme();
+            }
+
+            function handlePresetClick(e) {
+                const color = e.currentTarget.getAttribute('data-color');
+                globalState.theme.primaryColor = color;
+                colorPicker.value = color; // Sync color picker
+                applyTheme();
+            }
+            
+            // ==============================================
             // === VIEW SWITCHING LOGIC ===
             // ==============================================
 
-            function switchView(viewName) {
+            function switchView(viewName, updateHistory = true) {
                 globalState.activeView = viewName;
                 Object.values(views).forEach(view => view.setAttribute('hidden', true));
-                Object.values(navButtons).forEach(btn => btn.classList.remove('nav-button-active'));
+                
+                // Remove active classes from all nav buttons
+                Object.values(navButtons).forEach(btn => {
+                    btn.classList.remove('nav-button-active', 'border-primary-color', 'border');
+                });
                 
                 if (views[viewName]) {
                     views[viewName].removeAttribute('hidden');
                 }
+                
+                // Apply active class using dynamic primary color
                 if (navButtons[viewName]) {
                     navButtons[viewName].classList.add('nav-button-active');
+                }
+                
+                // Extra logic for Clock view start/stop
+                if (viewName === 'clock') {
+                    startClock();
+                } else if (globalState.clock.intervalId) {
+                    clearInterval(globalState.clock.intervalId);
+                    globalState.clock.intervalId = null;
                 }
             }
 
@@ -691,9 +899,10 @@
                     
                     playAlarm(true);
                     
-                    // Show "Continue" button, hide Start/Reset
+                    // Show "Continue" button, hide Start/Reset/Focus
                     startPauseBtn.setAttribute('hidden', true);
                     resetBtn.setAttribute('hidden', true);
+                    focusModeBtn.setAttribute('hidden', true); // Hide Focus button
                     continueBtn.removeAttribute('hidden');
                     pomoSettings.setAttribute('hidden', true);
                     
@@ -750,6 +959,7 @@
                 // Ensure the correct buttons are shown/hidden
                 startPauseBtn.removeAttribute('hidden');
                 resetBtn.removeAttribute('hidden');
+                focusModeBtn.removeAttribute('hidden'); // Show Focus button on reset
                 continueBtn.setAttribute('hidden', true);
                 
                 pomoSettings.removeAttribute('hidden');
@@ -771,12 +981,61 @@
                 // Hide "Continue", show main controls
                 startPauseBtn.removeAttribute('hidden');
                 resetBtn.removeAttribute('hidden');
+                focusModeBtn.removeAttribute('hidden'); // Show Focus button
                 continueBtn.setAttribute('hidden', true);
                 
                 // Automatically start the next session
                 togglePomodoro(); 
             }
             
+            // ==============================================
+            // === FOCUS MODE LOGIC ===
+            // ==============================================
+
+            function toggleFocusMode() {
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                } else {
+                    // Request fullscreen on the entire document element
+                    document.documentElement.requestFullscreen().catch(err => {
+                        console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+                    });
+                }
+            }
+
+            document.addEventListener('fullscreenchange', () => {
+                const isFullscreen = !!document.fullscreenElement;
+                
+                if (isFullscreen) {
+                    body.classList.add('fullscreen-focus');
+                } else {
+                    body.classList.remove('fullscreen-focus');
+                }
+                
+                // Update the button text only when the pomodoro view is active
+                if (globalState.activeView === 'pomodoro') {
+                    focusModeBtn.textContent = isFullscreen ? 'Exit Focus' : 'Focus Mode';
+                    
+                    // The focus button itself must not be hidden in focus mode, 
+                    // otherwise the user has no way to exit without the escape key.
+                    // Instead, we will hide all *other* controls.
+                    if (isFullscreen) {
+                        startPauseBtn.classList.add('focus-mode-hidden');
+                        resetBtn.classList.add('focus-mode-hidden');
+                        continueBtn.classList.add('focus-mode-hidden');
+                        // Make the focus button visible and primary to serve as the exit button
+                        focusModeBtn.classList.remove('btn-secondary');
+                        focusModeBtn.classList.add('btn-primary');
+                    } else {
+                        startPauseBtn.classList.remove('focus-mode-hidden');
+                        resetBtn.classList.remove('focus-mode-hidden');
+                        continueBtn.classList.remove('focus-mode-hidden');
+                        // Restore the focus button to its secondary state (it only acts as the primary exit button when active)
+                        focusModeBtn.classList.add('btn-secondary');
+                        focusModeBtn.classList.remove('btn-primary');
+                    }
+                }
+            });
 
             // ==============================================
             // === ALARM LOGIC ===
@@ -837,13 +1096,17 @@
             // === INITIALIZATION & EVENT LISTENERS ===
             // ==============================================
             
+            // --- Navigation Listeners ---
             navButtons.clock.addEventListener('click', () => switchView('clock'));
             navButtons.pomodoro.addEventListener('click', () => switchView('pomodoro'));
             navButtons.alarm.addEventListener('click', () => switchView('alarm'));
+            navButtons.settings.addEventListener('click', () => switchView('settings')); 
             
+            // --- Pomodoro Listeners ---
             startPauseBtn.addEventListener('click', togglePomodoro);
             resetBtn.addEventListener('click', resetPomodoro);
             continueBtn.addEventListener('click', continuePomodoro);
+            focusModeBtn.addEventListener('click', toggleFocusMode); // Focus Mode Listener
             
             focusInput.addEventListener('change', (e) => {
                 const val = Math.max(1, parseInt(e.target.value) || 1);
@@ -862,12 +1125,27 @@
                     updatePomodoroDisplay();
                 }
             });
+
+            // --- Theme Listeners ---
+            fontSelect.addEventListener('change', handleFontChange);
+            digitFontSelect.addEventListener('change', handleDigitFontChange); 
+            colorPicker.addEventListener('input', handleColorChange);
+            themePresetBtns.forEach(btn => btn.addEventListener('click', handlePresetClick));
             
+            // --- Alarm Listeners ---
             setAlarmBtn.addEventListener('click', setAlarm);
             clearAlarmBtn.addEventListener('click', clearAlarm);
             stopAlarmBtn.addEventListener('click', stopGeneralAlarm);
 
             function init() {
+                // Initialize state values for inputs/selectors
+                fontSelect.value = globalState.theme.font;
+                digitFontSelect.value = globalState.theme.digitFont;
+                colorPicker.value = globalState.theme.primaryColor;
+                
+                // Apply initial theme settings
+                applyTheme(); 
+
                 initializeClockDigits();
                 initializePomodoroDigits();
                 startClock();
